@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tegel Calculator 60x60 – tegels, voegsel, lijm, leveling</title>
+  <style>
+    :root { --bg:#0f172a; --card:#111827; --muted:#94a3b8; --txt:#e5e7eb; --acc:#38bdf8; --warn:#fbbf24; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin:0; background:linear-gradient(180deg,#0b1224,#0f172a); color:var(--txt); }
+    .wrap { max-width: 980px; margin: 28px auto; padding: 0 16px; }
+    h1 { font-size: 22px; margin: 0 0 12px; }
+    p { color: var(--muted); line-height: 1.4; }
+    .grid { display:grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 880px) { .grid { grid-template-columns: 1.2fr .8fr; } }
+    .card { background: rgba(17,24,39,.9); border: 1px solid rgba(148,163,184,.18); border-radius: 14px; padding: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+    .row { display:grid; grid-template-columns: 1fr; gap: 10px; margin: 10px 0; }
+    @media (min-width: 640px) { .row { grid-template-columns: 1fr 1fr; } }
+    label { display:block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    input, select { width:100%; padding:10px 10px; border-radius: 10px; border: 1px solid rgba(148,163,184,.25); background: rgba(2,6,23,.55); color: var(--txt); }
+    input[type="checkbox"] { width:auto; transform: scale(1.1); margin-right: 8px; }
+    .btns { display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
+    button { cursor:pointer; padding:10px 12px; border-radius: 10px; border: 1px solid rgba(148,163,184,.25); background: rgba(56,189,248,.15); color: var(--txt); }
+    button:hover { border-color: rgba(56,189,248,.7); }
+    .out h2 { font-size: 16px; margin: 0 0 10px; }
+    .kpi { display:grid; grid-template-columns: 1fr; gap: 10px; }
+    .kpi .box { border-radius: 12px; padding: 12px; background: rgba(2,6,23,.5); border: 1px solid rgba(148,163,184,.18); }
+    .big { font-size: 20px; color: var(--acc); margin-top: 4px; }
+    .small { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .note { border-left: 4px solid var(--warn); padding: 10px 12px; background: rgba(251,191,36,.08); border-radius: 10px; color: var(--txt); }
+    .mono { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Tegel calculator (60×60 cm, minimale voeg)</h1>
+    <p>
+      Bereken indicatief: <span class="mono">aantal tegels</span>, <span class="mono">voegsel</span>,
+      <span class="mono">tegellijm</span> en <span class="mono">leveling systeem</span>.
+      Dit zijn schattingen — check altijd fabrikantfiches en ondergrond/vlakheid.
+    </p>
+
+    <div class="grid">
+      <div class="card">
+        <h2 style="margin:0 0 8px;font-size:16px;">Invoer</h2>
+
+        <div class="row">
+          <div>
+            <label>Toepassing</label>
+            <select id="application">
+              <option value="floor">Vloer</option>
+              <option value="wall">Muur</option>
+              <option value="both">Beide (som)</option>
+            </select>
+          </div>
+          <div>
+            <label>Oppervlakte (m²) — vloer</label>
+            <input id="areaFloor" type="number" min="0" step="0.01" value="0">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Oppervlakte (m²) — muur</label>
+            <input id="areaWall" type="number" min="0" step="0.01" value="0">
+          </div>
+          <div>
+            <label>Snijverlies / reserve (%)</label>
+            <input id="wastePct" type="number" min="0" step="1" value="10">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Tegelmaat (cm)</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <input id="tileA" type="number" min="1" step="1" value="60">
+              <input id="tileB" type="number" min="1" step="1" value="60">
+            </div>
+            <div class="small">Standaard 60×60, maar je kan aanpassen.</div>
+          </div>
+          <div>
+            <label>Voegbreedte (mm)</label>
+            <input id="jointMm" type="number" min="1" step="0.5" value="2">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Tegeldikte (mm) (voor voegsel-berekening)</label>
+            <input id="tileThickMm" type="number" min="5" step="1" value="10">
+          </div>
+          <div>
+            <label>Voegsel-dichtheid factor (typisch 1.6–1.9)</label>
+            <input id="groutFactor" type="number" min="1.2" step="0.1" value="1.7">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Tandspaan (lijm)</label>
+            <select id="trowel">
+              <option value="6">6 mm (± 2.5–3.5 kg/m²)</option>
+              <option value="8">8 mm (± 3.5–4.5 kg/m²)</option>
+              <option value="10" selected>10 mm (± 4.5–5.5 kg/m²)</option>
+              <option value="12">12 mm (± 5.5–7.0 kg/m²)</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:flex;align-items:center;gap:8px;margin-top:22px;">
+              <input id="butter" type="checkbox" checked>
+              Dubbel verlijmen / back-buttering (aanrader bij 60×60 vloer)
+            </label>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Leveling clips per zijde (meestal 2 bij 60×60)</label>
+            <input id="clipsPerSide" type="number" min="0" step="1" value="2">
+          </div>
+          <div>
+            <label>Leveling wiggen/herbruikbaar? (optioneel, schatting)</label>
+            <input id="wedgeReuseFactor" type="number" min="1" step="1" value="4">
+            <div class="small">Wiggen worden vaak hergebruikt: bv 1 wig per 4 clips.</div>
+          </div>
+        </div>
+
+        <div class="btns">
+          <button onclick="calc()">Bereken</button>
+          <button onclick="resetDefaults()">Reset</button>
+        </div>
+
+        <div style="margin-top:12px" class="note">
+          <b>Open eindes om in het achterhoofd te houden:</b><br>
+          • 2 mm voeg is vooral realistisch bij gerectificeerde tegels + vlakke ondergrond.<br>
+          • Lijmverbruik hangt sterk af van vlakheid, ondergrond, tandspaanhoek en buttering.<br>
+          • Voegsel hangt af van voegdiepte en tegelvariaties. Resultaten = indicatief.
+        </div>
+      </div>
+
+      <div class="card out">
+        <h2>Resultaat</h2>
+        <div class="kpi">
+          <div class="box">
+            <div class="small">Totale oppervlakte (m²)</div>
+            <div class="big mono" id="outArea">–</div>
+          </div>
+
+          <div class="box">
+            <div class="small">Tegels (stuks) incl. snijverlies</div>
+            <div class="big mono" id="outTiles">–</div>
+            <div class="small mono" id="outTilesDetail">–</div>
+          </div>
+
+          <div class="box">
+            <div class="small">Voegsel (kg) (indicatie)</div>
+            <div class="big mono" id="outGrout">–</div>
+            <div class="small mono" id="outGroutDetail">–</div>
+          </div>
+
+          <div class="box">
+            <div class="small">Tegellijm (kg) (indicatie)</div>
+            <div class="big mono" id="outAdhesive">–</div>
+            <div class="small mono" id="outAdhesiveDetail">–</div>
+          </div>
+
+          <div class="box">
+            <div class="small">Leveling clips (stuks)</div>
+            <div class="big mono" id="outClips">–</div>
+            <div class="small mono" id="outClipsDetail">–</div>
+          </div>
+
+          <div class="box">
+            <div class="small">Leveling wiggen (stuks, ruwe schatting)</div>
+            <div class="big mono" id="outWedges">–</div>
+            <div class="small mono" id="outWedgesDetail">–</div>
+          </div>
+        </div>
+
+        <div style="margin-top:14px" class="note">
+          Tip: zet snijverlies hoger bij veel hoekjes/nisjes of diagonaal leggen.
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+function num(id){ return parseFloat(document.getElementById(id).value || "0"); }
+function sel(id){ return document.getElementById(id).value; }
+function fmt(n, d=2){ return (isFinite(n) ? n.toFixed(d) : "–"); }
+function ceil(n){ return Math.ceil(n); }
+
+function adhesiveKgPerM2(trowelMm, butter){
+  // Indicatieve bandbreedtes -> we nemen een middenwaarde.
+  // 6mm: 3.0, 8mm: 4.0, 10mm: 5.0, 12mm: 6.2
+  const mid = {6:3.0, 8:4.0, 10:5.0, 12:6.2}[trowelMm] || 5.0;
+  // Buttering verhoogt meestal ~10–25%. We nemen 20% als werkbare schatting.
+  return butter ? mid * 1.20 : mid;
+}
+
+function groutKgPerM2(tileAmm, tileBmm, thickMm, jointMm, factor){
+  // Veelgebruikte benadering:
+  // kg/m² ≈ ( (A+B) / (A*B) ) * joint * thick * factor
+  // A,B in mm.
+  const A = tileAmm, B = tileBmm;
+  return ((A + B) / (A * B)) * jointMm * thickMm * factor;
+}
+
+function calc(){
+  const application = sel("application");
+  const areaFloor = num("areaFloor");
+  const areaWall  = num("areaWall");
+  const wastePct  = num("wastePct")/100;
+
+  const tileAcm = num("tileA");
+  const tileBcm = num("tileB");
+  const tileAmm = tileAcm * 10;
+  const tileBmm = tileBcm * 10;
+
+  const jointMm = num("jointMm");
+  const thickMm = num("tileThickMm");
+  const factor  = num("groutFactor");
+
+  const trowel  = parseInt(sel("trowel"), 10);
+  const butter  = document.getElementById("butter").checked;
+
+  const clipsPerSide = num("clipsPerSide");
+  const wedgeReuse   = Math.max(1, num("wedgeReuseFactor"));
+
+  let area = 0;
+  if(application === "floor") area = areaFloor;
+  if(application === "wall")  area = areaWall;
+  if(application === "both")  area = areaFloor + areaWall;
+
+  const tileAreaM2 = (tileAcm/100) * (tileBcm/100);
+  const tilesBase  = area / tileAreaM2;
+  const tilesTotal = ceil(tilesBase * (1 + wastePct));
+
+  // Grout
+  const groutPerM2 = groutKgPerM2(tileAmm, tileBmm, thickMm, jointMm, factor);
+  const groutTotal = groutPerM2 * area;
+
+  // Adhesive
+  const adhPerM2 = adhesiveKgPerM2(trowel, butter);
+  const adhTotal = adhPerM2 * area;
+
+  // Leveling clips:
+  // per tegel: clipsPerSide * 4 / 2 omdat elke voeg clip gedeeld wordt tussen 2 tegels (ruwe schatting).
+  // => ~ 2 * clipsPerSide clips per tegel.
+  const clipsPerTile = 2 * clipsPerSide;
+  const clipsTotal = ceil(tilesTotal * clipsPerTile);
+
+  // Wedges (herbruik): 1 wig per N clips
+  const wedgesTotal = ceil(clipsTotal / wedgeReuse);
+
+  document.getElementById("outArea").textContent = fmt(area, 2);
+
+  document.getElementById("outTiles").textContent = tilesTotal.toString();
+  document.getElementById("outTilesDetail").textContent =
+    `Basis: ${fmt(tilesBase,1)} stuks • +${fmt(wastePct*100,0)}% = ${tilesTotal} stuks`;
+
+  document.getElementById("outGrout").textContent = fmt(groutTotal, 1) + " kg";
+  document.getElementById("outGroutDetail").textContent =
+    `${fmt(groutPerM2,2)} kg/m² (voeg ${jointMm} mm, dikte ${thickMm} mm, factor ${factor})`;
+
+  document.getElementById("outAdhesive").textContent = fmt(adhTotal, 0) + " kg";
+  document.getElementById("outAdhesiveDetail").textContent =
+    `${fmt(adhPerM2,2)} kg/m² (tandspaan ${trowel} mm${butter ? ", buttering" : ""})`;
+
+  document.getElementById("outClips").textContent = clipsTotal.toString();
+  document.getElementById("outClipsDetail").textContent =
+    `${fmt(clipsPerTile,0)} clips/tegel (2× clipsPerSide)`;
+
+  document.getElementById("outWedges").textContent = wedgesTotal.toString();
+  document.getElementById("outWedgesDetail").textContent =
+    `Schatting: 1 wig per ${wedgeReuse} clips (herbruikbaar)`;
+}
+
+function resetDefaults(){
+  document.getElementById("application").value = "both";
+  document.getElementById("areaFloor").value = 0;
+  document.getElementById("areaWall").value = 0;
+  document.getElementById("wastePct").value = 10;
+  document.getElementById("tileA").value = 60;
+  document.getElementById("tileB").value = 60;
+  document.getElementById("jointMm").value = 2;
+  document.getElementById("tileThickMm").value = 10;
+  document.getElementById("groutFactor").value = 1.7;
+  document.getElementById("trowel").value = "10";
+  document.getElementById("butter").checked = true;
+  document.getElementById("clipsPerSide").value = 2;
+  document.getElementById("wedgeReuseFactor").value = 4;
+  calc();
+}
+
+resetDefaults();
+</script>
+</body>
+</html>
